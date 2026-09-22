@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Chatbot</title>
+    <style>
+        body { font-family: Arial; max-width: 500px; margin: 40px auto; }
+        #chatbox { border: 1px solid #ccc; height: 400px; overflow-y: auto; padding: 10px; }
+        .user { color: blue; margin: 5px 0; }
+        .bot { color: green; margin: 5px 0; }
+        input[type=text] { width: 80%; padding: 8px; }
+        button { padding: 8px; }
+    </style>
+</head>
+<body>
+    <h2>Chat with my bot</h2>
+
+    <div id="chatbox">
+        {% for msg in messages %}
+            {% if msg.role == 'user' %}
+                <div class="user"><b>You:</b> {{ msg.content }}</div>
+            {% else %}
+                <div class="bot"><b>Bot:</b> {{ msg.content }}</div>
+            {% endif %}
+        {% endfor %}
+    </div>
+<form id="chatForm" onsubmit="sendMessage(event); return false;">
+    <input type="text" id="messageInput" required>
+    <button type="submit">Send</button>
+</form>
+
+<script>
+    chatbox.scrollTop = chatbox.scrollHeight;
+async function sendMessage(event) {
+    event.preventDefault();
+    
+
+    const input = document.getElementById("messageInput");
+    const message = input.value.trim();
+
+    if (!message) return;
+
+
+    // sending the message to the flask server
+    const response = await fetch("/send", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: message })
+        
+    });
+
+
+     // getting the response from the server
+    const data = await response.json();
+
+    document.getElementById("chatbox").innerHTML +=
+        `<div class="user"><b>You:</b> ${message}</div>
+         <div class="bot"><b>Bot:</b> ${data.reply}</div>`;
+
+
+         //to scroll down after sending a message
+    chatbox.scrollTop = chatbox.scrollHeight;
+    input.value = "";
+    
+}
+</script>
+</body>
+</html>
